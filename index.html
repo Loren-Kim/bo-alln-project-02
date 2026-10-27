@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>제휴 신규업체 연동관리 - 화면 프로토타입</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+      font-size: 12px;
+      color: #333333;
+      background-color: #f4f6f9;
+    }
+    .theme-teal {
+      background-color: #00a499;
+    }
+    .theme-teal-border {
+      border-color: #00a499;
+    }
+    .theme-teal-text {
+      color: #00a499;
+    }
+    .grid-hdr-blue {
+      background-color: #eaf1fa;
+      color: #334e68;
+    }
+    .grid-hdr-pink {
+      background-color: #ffe8e8;
+      color: #9c2727;
+    }
+    .dimmed {
+      background-color: #f0f1f3 !important;
+      color: #6b7280 !important;
+      cursor: not-allowed !important;
+      border-color: #d1d5db !important;
+    }
+    .selected-row {
+      background-color: #fff9db !important;
+    }
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #a8a8a8;
+    }
+  </style>
+</head>
+<body class="p-4 bg-[#f8fafc]">
+
+  <!-- Top Prototype Control Bar (For Reviewers) -->
+  <div class="max-w-7xl mx-auto mb-3 p-3 bg-gradient-to-r from-teal-50 to-indigo-50 border border-teal-200 rounded-lg shadow-sm flex flex-wrap items-center justify-between gap-2">
+    <div class="flex items-center gap-2">
+      <span class="px-2 py-0.5 bg-teal-600 text-white text-[11px] font-bold rounded">기획 시뮬레이터</span>
+      <span class="font-bold text-gray-800 text-sm">신세계몰 관리기준 변경 (상위업체 → 하위업체) 프로토타입</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <label class="flex items-center gap-1.5 cursor-pointer bg-white px-2.5 py-1 rounded border border-gray-300 shadow-xs">
+        <input type="checkbox" id="toggleAsIsToBe" class="rounded text-teal-600 focus:ring-teal-500" onchange="toggleViewMode(this.checked)">
+        <span class="text-xs font-semibold text-gray-700" id="viewModeLabel">To-Be 모드 (하위업체 기준 노출)</span>
+      </label>
+      <button onclick="resetAllDemo()" class="px-2.5 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded border border-gray-300 transition">
+        시뮬레이션 초기화
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Backoffice Container -->
+  <div class="max-w-7xl mx-auto bg-white border border-gray-300 rounded shadow-sm overflow-hidden">
+    
+    <!-- Title Bar -->
+    <div class="px-4 py-2.5 border-b border-gray-200 flex items-center justify-between bg-white">
+      <div class="flex items-center gap-2">
+        <h1 class="text-base font-bold text-gray-900 tracking-tight">제휴 신규업체 연동관리</h1>
+        <button class="px-1.5 py-0.5 text-[11px] border border-gray-300 rounded text-gray-600 hover:bg-gray-50 flex items-center gap-1">
+          <span class="text-amber-400">★</span> 메뉴 즐겨찾기
+        </button>
+      </div>
+      <div class="text-[11px] text-gray-500">
+        홈 &gt; 제휴관리 &gt; <span class="text-teal-700 font-semibold">제휴 신규업체 연동관리</span>
+      </div>
+    </div>
+
+    <!-- Notice Box -->
+    <div class="m-3 p-3 bg-[#f0fcfc] border border-[#a8edea] rounded relative text-[11px] leading-relaxed text-gray-700">
+      <div class="flex items-start gap-2">
+        <div class="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div>
+        <div>해당 메뉴는 <strong>W컨셉 신규 업체</strong>를 연동 관리하는 화면입니다. (※ W컨셉 제휴사부담 할인적용여부 사용 불가)</div>
+      </div>
+      <div class="flex items-start gap-2 mt-1">
+        <div class="w-1.5 h-1.5 rounded-full bg-teal-500 mt-1.5 shrink-0"></div>
+        <div>업체별+브랜드별+중분류 단으로 W컨셉 연동/연동해제 관리가 가능하며, W컨셉과 연동 협의를 하고 브랜드 매핑이 진행된 업체+브랜드만 연동이 가능합니다.</div>
+      </div>
+      <div class="flex items-start gap-2 mt-1">
+        <div class="w-1.5 h-1.5 rounded-full bg-red-500 mt-1.5 shrink-0"></div>
+        <div class="text-red-600 font-medium leading-normal">
+          W컨셉에 연동되는 온전용 상품은 배송비 정책이 SSG와 상이하여 동일협력사의 상품이 출고배송비가 다르더라도 최소 배송비로 한 번만 부과될 수 있으므로 <span class="font-bold underline">반드시 이 내용을 연동 업체&amp;브랜드에게 알리고 연동 동의를 받고 연동을 진행하셔야 합니다.</span>
+        </div>
+      </div>
+      <div class="absolute -bottom-2.5 left-1/2 transform -translate-x-1/2 bg-teal-500 text-white rounded-full w-5 h-5 flex items-center justify-center cursor-pointer hover:bg-teal-600 shadow-xs">
+        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+      </div>
+    </div>
+
+    <!-- Search Section: 첨부 이미지 기준 행 단위 나열 테이블 레이아웃 -->
+    <div class="border-t border-b border-gray-300 bg-white">
+      
+      <!-- Top Teal Line with Collapse Pill -->
+      <div class="h-0.5 bg-[#00a499] relative">
+        <div class="absolute -top-1.5 left-1/2 transform -translate-x-1/2 bg-[#00a499] text-white rounded-full w-4 h-4 flex items-center justify-center cursor-pointer shadow-xs">
+          <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+        </div>
+      </div>
+
+      <!-- Main Search Table Form & Right Textarea Container -->
+      <div class="flex flex-col lg:flex-row">
+        
+        <!-- Left: Search Rows Table -->
+        <table class="flex-1 text-xs border-collapse">
+          <tbody>
+            
+            <!-- Row 1: 업체구분 -->
+            <tr class="border-b border-gray-200">
+              <th class="w-32 py-2 px-3 bg-[#f8f9fa] text-gray-700 font-normal text-left border-r border-gray-200">
+                업체구분 <span class="text-[#00a499] font-bold">*</span>
+              </th>
+              <td class="py-1.5 px-3 flex items-center gap-2">
+                <select id="vendorTypeSelect" onchange="handleVendorTypeChange(this.value)" class="w-60 px-2 py-1 bg-white border border-gray-300 rounded text-xs focus:ring-1 focus:ring-teal-500 focus:border-teal-500 text-gray-800">
+                  <option value="ALL">전체</option>
+                  <option value="ONLINE_UPPER">온라인 상위업체</option>
+                  <option value="ONLINE_SUB" selected>온라인 하위업체 (신세계몰 전용)</option>
+                </select>
+                <span id="vendorTypeBadge" class="px-1.5 py-0.5 bg-amber-50 border border-amber-200 text-amber-800 text-[10px] rounded font-medium">
+                  상위업체 신세계몰(5000000000) 전용
+                </span>
+              </td>
+            </tr>
+
+            <!-- Row 2: 제휴사 (디폴트는 '선택', 클릭 시 해당 제휴사 노출) -->
+            <tr class="border-b border-gray-200">
+              <th class="w-32 py-2 px-3 bg-[#f8f9fa] text-gray-700 font-normal text-left border-r border-gray-200">
+                제휴사 <span class="text-[#00a499] font-bold">*</span>
+              </th>
+              <td class="py-1.5 px-3">
+                <div class="flex items-center gap-2">
+                  <select id="partnerSelect" class="w-60 px-2 py-1 bg-white border border-gray-300 rounded text-xs focus:ring-1 focus:ring-teal-500">
+                    <option value="">선택</option>
+                    <option value="0000019091">W컨셉-신세계몰 (0000019091)</option>
+                  </select>
+                  <span class="text-gray-400 text-[11px]">(디폴트: '선택')</span>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 3: 중분류 (이미지 기준: 팀분류 / 대분류 / 중분류) -->
+            <tr class="border-b border-gray-200">
+              <th class="w-32 py-2 px-3 bg-[#f8f9fa] text-gray-700 font-normal text-left border-r border-gray-200">
+                중분류
+              </th>
+              <td class="py-1.5 px-3">
+                <div class="flex items-center gap-1">
+                  <select class="px-2 py-1 bg-white border border-gray-300 rounded text-xs w-28"><option>팀분류</option><option>패션팀</option></select>
+                  <select class="px-2 py-1 bg-white border border-gray-300 rounded text-xs w-28"><option>대분류</option><option>여성의류</option></select>
+                  <select class="px-2 py-1 bg-white border border-gray-300 rounded text-xs w-28"><option>중분류</option><option>캐주얼</option></select>
+                  <button class="p-1 border border-gray-300 rounded bg-white hover:bg-gray-100 text-gray-600" title="초기화">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 4: 협력업체 (온라인 상위 vs 하위 인터랙션 명세 반영) -->
+            <tr class="border-b border-gray-200">
+              <th class="w-32 py-2 px-3 bg-[#f8f9fa] text-gray-700 font-normal text-left border-r border-gray-200">
+                협력업체
+              </th>
+              <td class="py-1.5 px-3">
+                <div class="flex items-center gap-1.5">
+                  <!-- 첫번째 텍스트박스 -->
+                  <input type="text" id="partnerBox1" value="(주)신세계몰(5000000000)" readonly class="w-48 px-2 py-1 border border-gray-300 rounded text-xs dimmed font-mono" placeholder="업체코드">
+                  
+                  <!-- 두번째 텍스트박스 -->
+                  <input type="text" id="partnerBox2" value="" class="w-64 px-2 py-1 bg-white border border-gray-300 rounded text-xs" placeholder="하위업체명 또는 코드 입력">
+                  
+                  <!-- 검색 버튼 -->
+                  <button id="partnerSearchBtn" onclick="simulateVendorSearchPopup()" class="px-2.5 py-1 border border-gray-300 rounded bg-white hover:bg-gray-50 text-gray-700 text-[11px] font-medium transition shadow-2xs">
+                    검색
+                  </button>
+
+                  <!-- 초기화 버튼 -->
+                  <button id="partnerResetBtn" onclick="resetVendorInputs()" class="p-1 border border-gray-300 rounded bg-white hover:bg-gray-50 text-gray-600 shadow-2xs">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                  </button>
+
+                  <!-- 인터랙션 안내 상태 라벨 -->
+                  <span id="vendorInputGuide" class="ml-2 text-teal-700 bg-teal-50 border border-teal-200 text-[11px] px-2 py-0.5 rounded font-normal">
+                    온라인 하위업체: 1번 (주)신세계몰(5000000000) 딤드 / 2번 흰색 입력창
+                  </span>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 5: MD그룹 -->
+            <tr>
+              <th class="w-32 py-2 px-3 bg-[#f8f9fa] text-gray-700 font-normal text-left border-r border-gray-200">
+                MD그룹
+              </th>
+              <td class="py-1.5 px-3">
+                <div class="flex items-center gap-1">
+                  <input type="text" placeholder="" class="w-60 px-2 py-1 bg-white border border-gray-300 rounded text-xs">
+                  <button class="p-1 border border-gray-300 rounded bg-white hover:bg-gray-100 text-gray-600">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+
+          </tbody>
+        </table>
+
+        <!-- Right: Multi-Code Textarea Box -->
+        <div class="w-full lg:w-44 p-2.5 border-t lg:border-t-0 lg:border-l border-gray-200 bg-white flex flex-col justify-start">
+          <select class="w-full mb-1.5 px-1.5 py-0.5 border border-gray-300 rounded text-[11px] bg-white">
+            <option id="multiSearchOptionLabel">업체코드</option>
+          </select>
+          <textarea id="multiSearchArea" class="w-full h-24 p-1.5 text-xs font-mono border border-gray-300 rounded resize-none focus:ring-1 focus:ring-teal-500" placeholder="0024779119"></textarea>
+        </div>
+
+      </div>
+
+      <!-- Bottom Action Buttons Row -->
+      <div class="py-1.5 px-3 bg-[#f8f9fa] border-t border-gray-200 flex justify-end gap-1.5">
+        <button onclick="executeSearch()" class="px-4 py-1.5 bg-[#00a499] hover:bg-teal-700 text-white font-semibold rounded text-xs flex items-center gap-1 shadow-xs transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          조회
+        </button>
+        <button onclick="resetSearchForm()" class="px-4 py-1.5 bg-[#6c757d] hover:bg-[#5a6268] text-white rounded text-xs flex items-center gap-1 transition">
+          <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          초기화
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Section 1: 업체 목록 (계약별 연동제외 목록) -->
+    <div class="p-3">
+      
+      <!-- Grid Top Toolbars -->
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <h2 class="font-bold text-gray-800 text-xs flex items-center gap-1.5">
+            <span>업체 목록</span>
+            <span id="vendorCountBadge" class="text-teal-600 font-semibold">(총 3건)</span>
+          </h2>
+          <span id="gridStandardBadge" class="px-2 py-0.5 bg-teal-100 text-teal-800 text-[10px] font-bold rounded-full">
+            To-Be: 하위업체 기준 노출
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-2 py-1 text-[11px] border border-gray-300 rounded bg-white hover:bg-gray-50 text-gray-700 flex items-center gap-1">
+            <svg class="w-3 h-3 text-green-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+            엑셀다운
+          </button>
+          <select class="px-2 py-1 text-[11px] border border-gray-300 rounded bg-white text-gray-700">
+            <option>100개씩 보기</option>
+            <option>50개씩 보기</option>
+          </select>
+          <button onclick="saveVendorChanges()" class="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded text-xs font-semibold shadow-xs transition flex items-center gap-1">
+            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+            저장
+          </button>
+        </div>
+      </div>
+
+      <!-- Table Container -->
+      <div class="border border-gray-300 rounded overflow-x-auto shadow-2xs">
+        <table class="w-full text-[11px] text-left border-collapse whitespace-nowrap">
+          <thead>
+            <tr class="border-b border-gray-300 text-center font-semibold">
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200 w-8">
+                <input type="checkbox" id="selectAllVendors" onchange="toggleSelectAll(this.checked)" class="rounded text-teal-600">
+              </th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200 w-10">순번</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200" id="thVendorCode">업체코드 (하위)</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200" id="thVendorName">업체명 (하위)</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">연계대상구분</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">송장구분</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">영업부서</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">제휴사명</th>
+              
+              <!-- Pink Headers: Modifiable Fields with Bulk Dropdown -->
+              <th class="p-1.5 grid-hdr-pink border-r border-red-200">
+                <div>제휴사연동여부</div>
+                <select onchange="bulkUpdateColumn('sync', this.value)" class="mt-1 px-1 py-0.5 text-[10px] bg-white border border-red-300 rounded font-normal">
+                  <option value="">일괄적용</option>
+                  <option value="제휴연동대기">제휴연동대기</option>
+                  <option value="제휴연동완료">제휴연동완료</option>
+                  <option value="제외">제외</option>
+                </select>
+              </th>
+              <th class="p-1.5 grid-hdr-pink border-r border-red-200">
+                <div>신규연동처리여부</div>
+                <select onchange="bulkUpdateColumn('proc', this.value)" class="mt-1 px-1 py-0.5 text-[10px] bg-white border border-red-300 rounded font-normal">
+                  <option value="">일괄적용</option>
+                  <option value="미진행">미진행</option>
+                  <option value="완료">완료</option>
+                </select>
+              </th>
+              <th class="p-1.5 grid-hdr-pink border-r border-red-200">
+                <div>제휴사부담 할인적용여부</div>
+                <select onchange="bulkUpdateColumn('discount', this.value)" class="mt-1 px-1 py-0.5 text-[10px] bg-white border border-red-300 rounded font-normal">
+                  <option value="">일괄적용</option>
+                  <option value="적용">적용</option>
+                  <option value="미적용">미적용</option>
+                </select>
+              </th>
+
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">대표MD명</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">최종수정자</th>
+              <th class="p-1.5 grid-hdr-blue">최종수정일</th>
+            </tr>
+          </thead>
+          <tbody id="vendorTableBody" class="divide-y divide-gray-200 bg-white">
+            <!-- Dynamically populated by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination Dummy -->
+      <div class="flex items-center justify-between mt-2 text-[11px] text-gray-500">
+        <div>1-3 / 총 3건</div>
+        <div class="flex items-center gap-1">
+          <button class="px-2 py-0.5 border border-gray-300 rounded bg-white">&lt;</button>
+          <span class="px-2 py-0.5 bg-teal-600 text-white rounded font-bold">1</span>
+          <button class="px-2 py-0.5 border border-gray-300 rounded bg-white">&gt;</button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Section 2: 브랜드 목록 -->
+    <div class="p-3 border-t border-gray-200 bg-gray-50">
+      
+      <!-- Brand Grid Header -->
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center gap-2">
+          <h2 class="font-bold text-gray-800 text-xs flex items-center gap-1.5">
+            <span>브랜드 목록</span>
+            <span id="brandCountBadge" class="text-teal-600 font-semibold">(선택된 업체: 0024729812 귀속 1건)</span>
+          </h2>
+          <span class="px-2 py-0.5 bg-indigo-100 text-indigo-800 text-[10px] font-bold rounded-full">
+            하위업체 기준 브랜드 바인딩
+          </span>
+        </div>
+        <div class="flex items-center gap-2">
+          <button class="px-2 py-1 text-[11px] border border-gray-300 rounded bg-white hover:bg-gray-50 text-gray-700">엑셀다운</button>
+          <select class="px-2 py-1 text-[11px] border border-gray-300 rounded bg-white text-gray-700"><option>100개씩 보기</option></select>
+          <button onclick="saveBrandChanges()" class="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white rounded text-xs font-semibold shadow-xs">
+            저장
+          </button>
+        </div>
+      </div>
+
+      <!-- Brand Table -->
+      <div class="border border-gray-300 rounded overflow-x-auto bg-white shadow-2xs">
+        <table class="w-full text-[11px] text-left border-collapse whitespace-nowrap">
+          <thead>
+            <tr class="border-b border-gray-300 text-center font-semibold">
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200 w-8"><input type="checkbox" class="rounded"></th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200 w-10">순번</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">브랜드코드</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">브랜드명</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">사용여부</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">상품군</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200" id="thBrandVendorCode">업체코드 (하위)</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200" id="thBrandVendorName">업체명 (하위)</th>
+              
+              <th class="p-1.5 grid-hdr-pink border-r border-red-200">제휴사연동여부</th>
+              <th class="p-1.5 grid-hdr-pink border-r border-red-200">신규연동처리여부</th>
+              <th class="p-1.5 grid-hdr-pink border-r border-red-200">제휴사부담할인적용여부</th>
+              
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">제휴사기본배송비명</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">제휴사반품배송비명</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">대표MD명</th>
+              <th class="p-1.5 grid-hdr-blue border-r border-gray-200">최종수정자</th>
+              <th class="p-1.5 grid-hdr-blue">최종수정일</th>
+            </tr>
+          </thead>
+          <tbody id="brandTableBody" class="divide-y divide-gray-200">
+            <!-- Brand Rows -->
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- Toast Notification Alert -->
+  <div id="toastNotification" class="fixed bottom-5 right-5 bg-gray-900 text-white px-4 py-2.5 rounded-lg shadow-xl text-xs flex items-center gap-2 transform transition-all duration-300 translate-y-20 opacity-0 pointer-events-none z-50">
+    <span class="text-teal-400">✔</span>
+    <span id="toastMessage">변경사항이 정상 저장되었습니다.</span>
+  </div>
+
+  <!-- Interactive JavaScript Logic -->
+  <script>
+    // Mock Data Store
+    const toBeVendorData = [
+      {
+        id: "0024729812",
+        name: "에이치알엠씨네트웍스 주식회사",
+        type: "온라인 하위",
+        invoice: "도우다우택배",
+        dept: "패션 > 여성캐주얼",
+        partner: "W컨셉-신세계몰",
+        syncStatus: "제휴연동대기",
+        procStatus: "미진행",
+        discount: "미적용",
+        md: "00029-이동길",
+        user: "141383",
+        date: "2026-10-26 11:20:00"
+      },
+      {
+        id: "0024729813",
+        name: "신세계라이브쇼핑 주식회사",
+        type: "온라인 하위",
+        invoice: "CJ대한통운",
+        dept: "패션 > 영캐주얼",
+        partner: "W컨셉-신세계몰",
+        syncStatus: "제휴연동대기",
+        procStatus: "미진행",
+        discount: "적용",
+        md: "00029-이동길",
+        user: "141383",
+        date: "2026-10-26 11:20:00"
+      },
+      {
+        id: "0024729814",
+        name: "베이직하우스 주식회사",
+        type: "온라인 하위",
+        invoice: "로젠택배",
+        dept: "잡화 > 여성잡화",
+        partner: "W컨셉-신세계몰",
+        syncStatus: "제휴연동완료",
+        procStatus: "완료",
+        discount: "미적용",
+        md: "00140-임정임",
+        user: "141383",
+        date: "2026-10-26 11:20:00"
+      }
+    ];
+
+    const asIsVendorData = [
+      {
+        id: "5000000000",
+        name: "주식회사 신세계 (신세계몰)",
+        type: "온라인 일반 상위업체",
+        invoice: "신세계통합택배",
+        dept: "신세계몰 > 신세계(의류)",
+        partner: "W컨셉-신세계몰",
+        syncStatus: "제휴연동대기",
+        procStatus: "미진행",
+        discount: "미적용",
+        md: "00029-이동길",
+        user: "141383",
+        date: "2023-10-11 15:29:26"
+      }
+    ];
+
+    let currentVendors = JSON.parse(JSON.stringify(toBeVendorData));
+    let selectedVendorIndex = 0;
+    let isAsIsMode = false;
+
+    // Handle Vendor Type Select Change
+    function handleVendorTypeChange(value) {
+      const box1 = document.getElementById("partnerBox1");
+      const box2 = document.getElementById("partnerBox2");
+      const partnerSelect = document.getElementById("partnerSelect");
+      const vendorTypeBadge = document.getElementById("vendorTypeBadge");
+      const vendorInputGuide = document.getElementById("vendorInputGuide");
+
+      if (value === "ONLINE_SUB") {
+        // [온라인 하위업체 선택 시]
+        // 1. 첫번째 텍스트박스: '(주)신세계몰(5000000000)' & 딤드처리
+        box1.value = "(주)신세계몰(5000000000)";
+        box1.classList.add("dimmed");
+        box1.readOnly = true;
+
+        // 2. 두번째 텍스트박스: 디폴트는 흰색 창
+        box2.value = "";
+        box2.placeholder = "하위업체명 또는 코드 입력";
+        box2.classList.remove("dimmed");
+        box2.readOnly = false;
+
+        // 3. 제휴사: 디폴트 '선택', 클릭 시 W컨셉-신세계몰(0000019091) 선택 가능
+        partnerSelect.innerHTML = `
+          <option value="">선택</option>
+          <option value="0000019091">W컨셉-신세계몰 (0000019091)</option>
+        `;
+        partnerSelect.value = ""; // 디폴트 '선택'
+
+        vendorTypeBadge.style.display = "inline-block";
+        vendorTypeBadge.innerText = "상위업체 신세계몰(5000000000) 전용";
+        vendorInputGuide.innerText = "온라인 하위업체: 1번 (주)신세계몰(5000000000) 딤드 / 2번 흰색 입력창";
+
+        showToast("온라인 하위업체: 1번 창에 신세계몰(5000000000)이 딤드 고정되고 2번 창이 흰색으로 활성화되었습니다.");
+      } else if (value === "ONLINE_UPPER") {
+        // [온라인 상위업체 선택 시]
+        // 1. 첫번째 텍스트박스: 디폴트는 흰색 창
+        box1.value = "";
+        box1.placeholder = "상위업체코드";
+        box1.classList.remove("dimmed");
+        box1.readOnly = false;
+
+        // 2. 두번째 텍스트박스: 디폴트 딤드처리
+        box2.value = "";
+        box2.placeholder = "업체명";
+        box2.classList.add("dimmed");
+        box2.readOnly = true;
+
+        // 3. 제휴사: 디폴트 '선택', 클릭 시 W컨셉-신세계몰(0000019091) 선택 가능
+        partnerSelect.innerHTML = `
+          <option value="">선택</option>
+          <option value="0000019091">W컨셉-신세계몰 (0000019091)</option>
+        `;
+        partnerSelect.value = ""; // 디폴트 '선택'
+
+        vendorTypeBadge.style.display = "none";
+        vendorInputGuide.innerText = "온라인 상위업체: 1번 흰색 입력창 / 2번 딤드처리";
+
+        showToast("온라인 상위업체: 1번 창이 흰색으로 활성화되고 2번 창이 딤드 처리되었습니다.");
+      } else {
+        // [전체 선택 시]
+        box1.value = "";
+        box1.placeholder = "업체코드";
+        box1.classList.remove("dimmed");
+        box1.readOnly = false;
+
+        box2.value = "";
+        box2.placeholder = "업체명";
+        box2.classList.add("dimmed");
+        box2.readOnly = true;
+
+        partnerSelect.innerHTML = `
+          <option value="">선택</option>
+          <option value="0000019091">W컨셉-신세계몰 (0000019091)</option>
+          <option value="0000021000">네이버 스마트스토어</option>
+          <option value="0000032000">11번가</option>
+        `;
+        partnerSelect.value = "";
+
+        vendorTypeBadge.style.display = "none";
+        vendorInputGuide.innerText = "전체: 1번 흰색 입력창 / 2번 딤드처리";
+      }
+    }
+
+    // Simulate Vendor Search Popup
+    function simulateVendorSearchPopup() {
+      const vendorType = document.getElementById("vendorTypeSelect").value;
+      if (vendorType === "ONLINE_SUB") {
+        // 하위업체 검색 시뮬레이션 -> 2번째 박스에 하위업체명 입력
+        document.getElementById("partnerBox2").value = "에이치알엠씨네트웍스 (0024729812)";
+        showToast("하위업체 검색 완료: 2번째 박스에 하위업체 정보가 입력되었습니다.");
+      } else {
+        // 상위업체 검색 시뮬레이션 -> 1번째 박스에 코드, 2번째 박스에 명칭
+        document.getElementById("partnerBox1").value = "0024729812";
+        document.getElementById("partnerBox2").value = "에이치알엠씨네트웍스 주식회사";
+        showToast("상위업체 검색 완료: 1번 코드 / 2번 업체명이 입력되었습니다.");
+      }
+    }
+
+    function resetVendorInputs() {
+      const vendorType = document.getElementById("vendorTypeSelect").value;
+      if (vendorType === "ONLINE_SUB") {
+        document.getElementById("partnerBox2").value = "";
+      } else {
+        document.getElementById("partnerBox1").value = "";
+        document.getElementById("partnerBox2").value = "";
+      }
+      showToast("협력업체 입력값이 초기화되었습니다.");
+    }
+
+    // Render Vendor Table
+    function renderVendorTable() {
+      const tbody = document.getElementById("vendorTableBody");
+      tbody.innerHTML = "";
+
+      currentVendors.forEach((vendor, idx) => {
+        const isSelected = (idx === selectedVendorIndex);
+        const tr = document.createElement("tr");
+        tr.className = `border-b border-gray-200 hover:bg-blue-50/50 cursor-pointer transition ${isSelected ? 'selected-row' : ''}`;
+        tr.onclick = (e) => {
+          if (e.target.tagName !== 'SELECT' && e.target.tagName !== 'INPUT') {
+            selectVendor(idx);
+          }
+        };
+
+        tr.innerHTML = `
+          <td class="p-1.5 text-center border-r border-gray-200">
+            <input type="checkbox" class="vendor-chk rounded text-teal-600" data-idx="${idx}" ${isSelected ? 'checked' : ''}>
+          </td>
+          <td class="p-1.5 text-center border-r border-gray-200 text-gray-500">${idx + 1}</td>
+          <td class="p-1.5 border-r border-gray-200 font-mono font-medium text-teal-700 underline">
+            <a href="javascript:void(0)" onclick="alert('업체코드 [${vendor.id}] 상세 팝업 호출')">${vendor.id}</a>
+          </td>
+          <td class="p-1.5 border-r border-gray-200 font-semibold text-gray-800">${vendor.name}</td>
+          <td class="p-1.5 text-center border-r border-gray-200 text-gray-600">${vendor.type}</td>
+          <td class="p-1.5 text-center border-r border-gray-200 text-gray-600">${vendor.invoice}</td>
+          <td class="p-1.5 border-r border-gray-200 text-gray-600">${vendor.dept}</td>
+          <td class="p-1.5 border-r border-gray-200 text-gray-600">${vendor.partner}</td>
+          
+          <!-- Editable Selects -->
+          <td class="p-1 border-r border-gray-200 text-center">
+            <select onchange="updateVendorField(${idx}, 'syncStatus', this.value)" class="px-1 py-0.5 border border-red-300 rounded text-[11px] bg-white">
+              <option value="제휴연동대기" ${vendor.syncStatus === '제휴연동대기' ? 'selected' : ''}>제휴연동대기</option>
+              <option value="제휴연동완료" ${vendor.syncStatus === '제휴연동완료' ? 'selected' : ''}>제휴연동완료</option>
+              <option value="제외" ${vendor.syncStatus === '제외' ? 'selected' : ''}>제외</option>
+              <option value="미신청" ${vendor.syncStatus === '미신청' ? 'selected' : ''}>미신청</option>
+            </select>
+          </td>
+          <td class="p-1 border-r border-gray-200 text-center">
+            <select onchange="updateVendorField(${idx}, 'procStatus', this.value)" class="px-1 py-0.5 border border-red-300 rounded text-[11px] bg-white">
+              <option value="미진행" ${vendor.procStatus === '미진행' ? 'selected' : ''}>미진행</option>
+              <option value="완료" ${vendor.procStatus === '완료' ? 'selected' : ''}>완료</option>
+            </select>
+          </td>
+          <td class="p-1 border-r border-gray-200 text-center">
+            <select onchange="updateVendorField(${idx}, 'discount', this.value)" class="px-1 py-0.5 border border-red-300 rounded text-[11px] bg-white">
+              <option value="적용" ${vendor.discount === '적용' ? 'selected' : ''}>적용</option>
+              <option value="미적용" ${vendor.discount === '미적용' ? 'selected' : ''}>미적용</option>
+            </select>
+          </td>
+
+          <td class="p-1.5 border-r border-gray-200 text-gray-700">${vendor.md}</td>
+          <td class="p-1.5 text-center border-r border-gray-200 text-gray-500">${vendor.user}</td>
+          <td class="p-1.5 text-center text-gray-500">${vendor.date}</td>
+        `;
+
+        tbody.appendChild(tr);
+      });
+
+      renderBrandTable();
+    }
+
+    // Render Brand Table based on selected Vendor
+    function renderBrandTable() {
+      const tbody = document.getElementById("brandTableBody");
+      const currentVendor = currentVendors[selectedVendorIndex] || currentVendors[0];
+      const brandCountBadge = document.getElementById("brandCountBadge");
+
+      brandCountBadge.innerText = `(선택된 업체: ${currentVendor.id} / ${currentVendor.name} 귀속 1건)`;
+
+      tbody.innerHTML = `
+        <tr class="border-b border-gray-200 hover:bg-gray-50">
+          <td class="p-1.5 text-center border-r border-gray-200"><input type="checkbox" checked class="rounded text-teal-600"></td>
+          <td class="p-1.5 text-center border-r border-gray-200 text-gray-500">1</td>
+          <td class="p-1.5 border-r border-gray-200 font-mono text-teal-700 font-semibold underline">
+            <a href="javascript:void(0)" onclick="alert('브랜드코드 [2000003527] 상세')">2000003527</a>
+          </td>
+          <td class="p-1.5 border-r border-gray-200 font-semibold">FM91</td>
+          <td class="p-1.5 text-center border-r border-gray-200 text-green-700 font-bold">Y</td>
+          <td class="p-1.5 border-r border-gray-200 text-gray-600">캐주얼</td>
+          <td class="p-1.5 border-r border-gray-200 font-mono text-gray-800 font-medium">${currentVendor.id}</td>
+          <td class="p-1.5 border-r border-gray-200 font-medium text-gray-800">${currentVendor.name}</td>
+          
+          <td class="p-1 border-r border-gray-200 text-center">
+            <select class="px-1 py-0.5 border border-red-300 rounded text-[11px] bg-white">
+              <option>제휴연동대기</option>
+              <option>제휴연동완료</option>
+            </select>
+          </td>
+          <td class="p-1 border-r border-gray-200 text-center">
+            <select class="px-1 py-0.5 border border-red-300 rounded text-[11px] bg-white">
+              <option>미진행</option>
+              <option>완료</option>
+            </select>
+          </td>
+          <td class="p-1 border-r border-gray-200 text-center">
+            <select class="px-1 py-0.5 border border-red-300 rounded text-[11px] bg-white">
+              <option ${currentVendor.discount === '적용' ? 'selected' : ''}>적용</option>
+              <option ${currentVendor.discount === '미적용' ? 'selected' : ''}>미적용</option>
+            </select>
+          </td>
+
+          <td class="p-1.5 border-r border-gray-200 text-gray-600">무료배송</td>
+          <td class="p-1.5 border-r border-gray-200 text-gray-600">편도 2,500원</td>
+          <td class="p-1.5 border-r border-gray-200 text-gray-700">${currentVendor.md}</td>
+          <td class="p-1.5 text-center border-r border-gray-200 text-gray-500">141403</td>
+          <td class="p-1.5 text-center text-gray-500">2026-10-26 11:22:15</td>
+        </tr>
+      `;
+    }
+
+    function selectVendor(index) {
+      selectedVendorIndex = index;
+      renderVendorTable();
+    }
+
+    function updateVendorField(idx, field, val) {
+      currentVendors[idx][field] = val;
+    }
+
+    // Bulk column updates from header dropdowns
+    function bulkUpdateColumn(type, value) {
+      if (!value) return;
+      currentVendors.forEach(v => {
+        if (type === 'sync') v.syncStatus = value;
+        if (type === 'proc') v.procStatus = value;
+        if (type === 'discount') v.discount = value;
+      });
+      renderVendorTable();
+      showToast(`전체 업체의 [${type}] 항목이 '${value}'(으)로 일괄 적용되었습니다.`);
+    }
+
+    function toggleSelectAll(checked) {
+      const chks = document.querySelectorAll(".vendor-chk");
+      chks.forEach(c => c.checked = checked);
+    }
+
+    function executeSearch() {
+      const multiInput = document.getElementById("multiSearchArea").value.trim();
+      if (multiInput) {
+        const codes = multiInput.split('\n').map(s => s.trim()).filter(Boolean);
+        currentVendors = toBeVendorData.filter(v => codes.includes(v.id));
+        if (currentVendors.length === 0) {
+          currentVendors = toBeVendorData;
+          showToast(`입력된 코드 [${codes.join(', ')}] 중 일치 데이터가 없어 전체를 표시합니다.`);
+        } else {
+          showToast(`하위업체코드 기준 필터링 조회 완료 (${currentVendors.length}건)`);
+        }
+      } else {
+        currentVendors = isAsIsMode ? JSON.parse(JSON.stringify(asIsVendorData)) : JSON.parse(JSON.stringify(toBeVendorData));
+        showToast("조건에 따라 그리드 조회가 완료되었습니다.");
+      }
+      selectedVendorIndex = 0;
+      document.getElementById("vendorCountBadge").innerText = `(총 ${currentVendors.length}건)`;
+      renderVendorTable();
+    }
+
+    function resetSearchForm() {
+      document.getElementById("vendorTypeSelect").value = "ONLINE_SUB";
+      handleVendorTypeChange("ONLINE_SUB");
+      document.getElementById("multiSearchArea").value = "";
+      currentVendors = JSON.parse(JSON.stringify(toBeVendorData));
+      selectedVendorIndex = 0;
+      renderVendorTable();
+      showToast("검색조건이 기본값으로 초기화되었습니다.");
+    }
+
+    function saveVendorChanges() {
+      showToast("✔ 선택된 하위업체의 제휴연동 및 할인적용 설정이 DB에 성공적으로 저장되었습니다.");
+    }
+
+    function saveBrandChanges() {
+      showToast("✔ 브랜드 단위 제휴연동 설정이 저장되었습니다.");
+    }
+
+    // Toggle As-Is vs To-Be View Mode
+    function toggleViewMode(isAsIs) {
+      isAsIsMode = isAsIs;
+      const label = document.getElementById("viewModeLabel");
+      const gridBadge = document.getElementById("gridStandardBadge");
+      const thVendorCode = document.getElementById("thVendorCode");
+      const thVendorName = document.getElementById("thVendorName");
+      const thBrandVendorCode = document.getElementById("thBrandVendorCode");
+      const thBrandVendorName = document.getElementById("thBrandVendorName");
+      const multiSearchOptionLabel = document.getElementById("multiSearchOptionLabel");
+      const vendorTypeSelect = document.getElementById("vendorTypeSelect");
+
+      if (isAsIs) {
+        label.innerText = "As-Is 모드 (과거 상위업체 기준 노출)";
+        label.classList.add("text-amber-800");
+        gridBadge.innerText = "As-Is: 상위업체 기준 노출";
+        gridBadge.className = "px-2 py-0.5 bg-amber-100 text-amber-800 text-[10px] font-bold rounded-full";
+        
+        thVendorCode.innerText = "업체코드 (상위)";
+        thVendorName.innerText = "업체명 (상위)";
+        thBrandVendorCode.innerText = "업체코드 (상위)";
+        thBrandVendorName.innerText = "업체명 (상위)";
+        multiSearchOptionLabel.innerText = "업체코드";
+
+        vendorTypeSelect.value = "ONLINE_UPPER";
+        handleVendorTypeChange("ONLINE_UPPER");
+        currentVendors = JSON.parse(JSON.stringify(asIsVendorData));
+      } else {
+        label.innerText = "To-Be 모드 (신규 하위업체 기준 노출)";
+        label.classList.remove("text-amber-800");
+        gridBadge.innerText = "To-Be: 하위업체 기준 노출";
+        gridBadge.className = "px-2 py-0.5 bg-teal-100 text-teal-800 text-[10px] font-bold rounded-full";
+
+        thVendorCode.innerText = "업체코드 (하위)";
+        thVendorName.innerText = "업체명 (하위)";
+        thBrandVendorCode.innerText = "업체코드 (하위)";
+        thBrandVendorName.innerText = "업체명 (하위)";
+        multiSearchOptionLabel.innerText = "업체코드";
+
+        vendorTypeSelect.value = "ONLINE_SUB";
+        handleVendorTypeChange("ONLINE_SUB");
+        currentVendors = JSON.parse(JSON.stringify(toBeVendorData));
+      }
+
+      selectedVendorIndex = 0;
+      document.getElementById("vendorCountBadge").innerText = `(총 ${currentVendors.length}건)`;
+      renderVendorTable();
+    }
+
+    function resetAllDemo() {
+      document.getElementById("toggleAsIsToBe").checked = false;
+      toggleViewMode(false);
+      resetSearchForm();
+    }
+
+    function showToast(msg) {
+      const toast = document.getElementById("toastNotification");
+      const toastMsg = document.getElementById("toastMessage");
+      toastMsg.innerText = msg;
+      toast.classList.remove("translate-y-20", "opacity-0", "pointer-events-none");
+      setTimeout(() => {
+        toast.classList.add("translate-y-20", "opacity-0", "pointer-events-none");
+      }, 3000);
+    }
+
+    // Initialize on load
+    handleVendorTypeChange("ONLINE_SUB");
+    renderVendorTable();
+  </script>
+</body>
+</html>
